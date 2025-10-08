@@ -4,21 +4,26 @@ import lombok.Getter;
 import lombok.Setter;
 import stanis.client.utils.time.DeltaTracker;
 
+import java.lang.annotation.Retention;
+
 @Getter
 @Setter
 public class EasingAnimation {
-    private float value = 0;
-    private float start = 0;
-    private float end = 0;
-    private float progress = 1;
+    private float value;
+    private float start;
+    private float end;
+    private float progress;
 
-    private Easing function = Easing.OUT_CUBIC;
-
-    public EasingAnimation(Easing function) {
-        this.function = function;
+    public EasingAnimation() {
+        this(0);
     }
 
-    public EasingAnimation() {}
+    public EasingAnimation(float initialValue) {
+        this.value = initialValue;
+        this.start = initialValue;
+        this.end = initialValue;
+        this.progress = 1f;
+    }
 
     public void reset() {
         this.value = end;
@@ -26,7 +31,7 @@ public class EasingAnimation {
         this.progress = 1f;
     }
     
-    public void update(float speed) {
+    public void update(float speed, Easing function) {
         if (progress < 1f) {
             progress += speed * DeltaTracker.getMilli() / 1000;
             progress = Math.min(progress, 1f);

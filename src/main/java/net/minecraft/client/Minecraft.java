@@ -186,6 +186,8 @@ import org.lwjgl.util.glu.GLU;
 import stanis.client.Client;
 import stanis.client.event.EventCaller;
 import stanis.client.event.impl.TickEvent;
+import stanis.client.ui.main.MainMenuScreen;
+import stanis.client.utils.time.DeltaTracker;
 
 public class Minecraft implements IThreadListener, IPlayerUsage {
     private static final Logger logger = LogManager.getLogger();
@@ -477,9 +479,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         this.ingameGUI = new GuiIngame(this);
 
         if (this.serverName != null) {
-            this.displayGuiScreen(new GuiConnecting(new GuiMainMenu(), this, this.serverName, this.serverPort));
+            this.displayGuiScreen(new GuiConnecting(new MainMenuScreen(), this, this.serverName, this.serverPort));
         } else {
-            this.displayGuiScreen(new GuiMainMenu());
+            this.displayGuiScreen(new MainMenuScreen());
         }
 
         this.renderEngine.deleteTexture(this.mojangLogo);
@@ -768,12 +770,12 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         }
 
         if (guiScreenIn == null && this.theWorld == null) {
-            guiScreenIn = new GuiMainMenu();
+            guiScreenIn = new MainMenuScreen();
         } else if (guiScreenIn == null && this.thePlayer.getHealth() <= 0.0F) {
             guiScreenIn = new GuiGameOver();
         }
 
-        if (guiScreenIn instanceof GuiMainMenu) {
+        if (guiScreenIn instanceof MainMenuScreen) {
             this.gameSettings.showDebugInfo = false;
             this.ingameGUI.getChatGUI().clearChatMessages();
         }
@@ -832,6 +834,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
     }
 
     private void runGameLoop() throws IOException {
+        DeltaTracker.startFrame();
         long i = System.nanoTime();
         this.mcProfiler.startSection("root");
 
@@ -947,6 +950,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
         }
 
         this.mcProfiler.endSection();
+
+        DeltaTracker.update();
     }
 
     public void updateDisplay() {
