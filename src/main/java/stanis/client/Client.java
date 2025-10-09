@@ -20,8 +20,8 @@ public class Client {
     private final String RESOURCES_ID = "minecraft";
     private final String RESOURCES_CLIENT_ID = "stanis/";
 
-    private final ResourceLocation ICON16X16 = of("logo/logo16x16.png");
-    private final ResourceLocation ICON32X32 = of("logo/logo32x32.png");
+    private final ResourceLocation ICON16X16 = of("textures/icon/logo16x16.png");
+    private final ResourceLocation ICON32X32 = of("textures/icon/logo32x32.png");
 
     public final File CLIENT_DIRECTORY = new File(NAME);
 

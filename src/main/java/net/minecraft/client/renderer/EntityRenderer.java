@@ -35,6 +35,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.client.shader.ShaderLinkHelper;
 import net.minecraft.crash.CrashReport;
@@ -96,6 +97,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.Project;
+import stanis.client.event.EventCaller;
+import stanis.client.event.impl.Render2DEvent;
+import stanis.client.utils.render.shader.Shader;
+import stanis.client.utils.render.shader.impl.BlurUtils;
 
 public class EntityRenderer implements IResourceManagerReloadListener
 {
@@ -169,6 +174,8 @@ public class EntityRenderer implements IResourceManagerReloadListener
     private float avgServerTickDiff = 0.0F;
     private ShaderGroup[] fxaaShaders = new ShaderGroup[10];
     private boolean loadVisibleChunks = false;
+
+    public static Framebuffer framebuffer = new Framebuffer(1, 1, false);
 
     public EntityRenderer(Minecraft mcIn, IResourceManager resourceManagerIn)
     {
@@ -1169,69 +1176,57 @@ public class EntityRenderer implements IResourceManagerReloadListener
         return i > 200 ? 1.0F : 0.7F + MathHelper.sin(((float)i - partialTicks) * (float)Math.PI * 0.2F) * 0.3F;
     }
 
-    public void updateCameraAndRender(float partialTicks, long nanoTime)
-    {
+    public void updateCameraAndRender(float partialTicks, long nanoTime) {
         Config.renderPartialTicks = partialTicks;
         this.frameInit();
         boolean flag = Display.isActive();
 
-        if (!flag && this.mc.gameSettings.pauseOnLostFocus && (!this.mc.gameSettings.touchscreen || !Mouse.isButtonDown(1)))
-        {
-            if (Minecraft.getSystemTime() - this.prevFrameTime > 500L)
-            {
+        if (!flag && this.mc.gameSettings.pauseOnLostFocus && (!this.mc.gameSettings.touchscreen || !Mouse.isButtonDown(1))) {
+            if (Minecraft.getSystemTime() - this.prevFrameTime > 500L) {
                 this.mc.displayInGameMenu();
             }
-        }
-        else
-        {
+        } else {
             this.prevFrameTime = Minecraft.getSystemTime();
         }
 
         this.mc.mcProfiler.startSection("mouse");
 
-        if (flag && Minecraft.isRunningOnMac && this.mc.inGameHasFocus && !Mouse.isInsideWindow())
-        {
+        if (flag && Minecraft.isRunningOnMac && this.mc.inGameHasFocus && !Mouse.isInsideWindow()) {
             Mouse.setGrabbed(false);
             Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
             Mouse.setGrabbed(true);
         }
 
-        if (this.mc.inGameHasFocus && flag)
-        {
+        if (this.mc.inGameHasFocus && flag) {
             this.mc.mouseHelper.mouseXYChange();
             float f = this.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
             float f1 = f * f * f * 8.0F;
-            float f2 = (float)this.mc.mouseHelper.deltaX * f1;
-            float f3 = (float)this.mc.mouseHelper.deltaY * f1;
+            float f2 = (float) this.mc.mouseHelper.deltaX * f1;
+            float f3 = (float) this.mc.mouseHelper.deltaY * f1;
             int i = 1;
 
-            if (this.mc.gameSettings.invertMouse)
-            {
+            if (this.mc.gameSettings.invertMouse) {
                 i = -1;
             }
 
-            if (this.mc.gameSettings.smoothCamera)
-            {
+            if (this.mc.gameSettings.smoothCamera) {
                 this.smoothCamYaw += f2;
                 this.smoothCamPitch += f3;
                 float f4 = partialTicks - this.smoothCamPartialTicks;
                 this.smoothCamPartialTicks = partialTicks;
                 f2 = this.smoothCamFilterX * f4;
                 f3 = this.smoothCamFilterY * f4;
-                this.mc.thePlayer.setAngles(f2, f3 * (float)i);
-            }
-            else
-            {
+                this.mc.thePlayer.setAngles(f2, f3 * (float) i);
+            } else {
                 this.smoothCamYaw = 0.0F;
                 this.smoothCamPitch = 0.0F;
-                this.mc.thePlayer.setAngles(f2, f3 * (float)i);
+                this.mc.thePlayer.setAngles(f2, f3 * (float) i);
             }
         }
 
         this.mc.mcProfiler.endSection();
 
-        if (!this.mc.skipRenderWorld)
-        {
+        if (!this.mc.skipRenderWorld) {
             anaglyphEnable = this.mc.gameSettings.anaglyph;
             final ScaledResolution scaledresolution = new ScaledResolution(this.mc);
             int i1 = scaledresolution.getScaledWidth();
@@ -1240,21 +1235,18 @@ public class EntityRenderer implements IResourceManagerReloadListener
             final int l1 = j1 - Mouse.getY() * j1 / this.mc.displayHeight - 1;
             int i2 = this.mc.gameSettings.limitFramerate;
 
-            if (this.mc.theWorld != null)
-            {
+            if (this.mc.theWorld != null) {
                 this.mc.mcProfiler.startSection("level");
                 int j = Math.min(Minecraft.getDebugFPS(), i2);
                 j = Math.max(j, 60);
                 long k = System.nanoTime() - nanoTime;
-                long l = Math.max((long)(1000000000 / j / 4) - k, 0L);
+                long l = Math.max((long) (1000000000 / j / 4) - k, 0L);
                 this.renderWorld(partialTicks, System.nanoTime() + l);
 
-                if (OpenGlHelper.shadersSupported)
-                {
+                if (OpenGlHelper.shadersSupported) {
                     this.mc.renderGlobal.renderEntityOutlineFramebuffer();
 
-                    if (this.theShaderGroup != null && this.useShader)
-                    {
+                    if (this.theShaderGroup != null && this.useShader) {
                         GlStateManager.matrixMode(5890);
                         GlStateManager.pushMatrix();
                         GlStateManager.loadIdentity();
@@ -1268,26 +1260,37 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 this.renderEndNanoTime = System.nanoTime();
                 this.mc.mcProfiler.endStartSection("gui");
 
-                if (!this.mc.gameSettings.hideGUI || this.mc.currentScreen != null)
-                {
+                if (!this.mc.gameSettings.hideGUI || this.mc.currentScreen != null) {
                     GlStateManager.alphaFunc(516, 0.1F);
+
                     this.mc.ingameGUI.renderGameOverlay(partialTicks);
 
-                    if (this.mc.gameSettings.ofShowFps && !this.mc.gameSettings.showDebugInfo)
-                    {
+                    BlurUtils.draw();
+                    this.mc.getFramebuffer().bindFramebuffer(false);
+                    this.framebuffer.bindFramebufferTexture();
+                    Shader.drawQuad();
+                    GlStateManager.bindTexture(0);
+
+                    GlStateManager.pushMatrix();
+                    Render2DEvent render2DEvent = new Render2DEvent(new ScaledResolution(mc), k1, l1);
+                    EventCaller.call(render2DEvent);
+                    GlStateManager.popMatrix();
+
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    GlStateManager.disableLighting();
+                    GlStateManager.enableAlpha();
+
+                    if (this.mc.gameSettings.ofShowFps && !this.mc.gameSettings.showDebugInfo) {
                         Config.drawFps();
                     }
 
-                    if (this.mc.gameSettings.showDebugInfo)
-                    {
+                    if (this.mc.gameSettings.showDebugInfo) {
                         Lagometer.showLagometer(scaledresolution);
                     }
                 }
 
                 this.mc.mcProfiler.endSection();
-            }
-            else
-            {
+            } else {
                 GlStateManager.viewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
                 GlStateManager.matrixMode(5889);
                 GlStateManager.loadIdentity();
@@ -1297,48 +1300,28 @@ public class EntityRenderer implements IResourceManagerReloadListener
                 this.renderEndNanoTime = System.nanoTime();
                 TileEntityRendererDispatcher.instance.renderEngine = this.mc.getTextureManager();
                 TileEntityRendererDispatcher.instance.fontRenderer = this.mc.fontRendererObj;
+
             }
 
-            if (this.mc.currentScreen != null)
-            {
+            if (this.mc.currentScreen != null) {
                 GlStateManager.clear(256);
 
-                try
-                {
-                    if (Reflector.ForgeHooksClient_drawScreen.exists())
-                    {
-                        Reflector.callVoid(Reflector.ForgeHooksClient_drawScreen, new Object[] {this.mc.currentScreen, Integer.valueOf(k1), Integer.valueOf(l1), Float.valueOf(partialTicks)});
-                    }
-                    else
-                    {
+                try {
+                    if (Reflector.ForgeHooksClient_drawScreen.exists()) {
+                        Reflector.callVoid(Reflector.ForgeHooksClient_drawScreen, new Object[]{this.mc.currentScreen, Integer.valueOf(k1), Integer.valueOf(l1), Float.valueOf(partialTicks)});
+                    } else {
                         this.mc.currentScreen.drawScreen(k1, l1, partialTicks);
                     }
-                }
-                catch (Throwable throwable)
-                {
+                } catch (Throwable throwable) {
                     CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering screen");
                     CrashReportCategory crashreportcategory = crashreport.makeCategory("Screen render details");
-                    crashreportcategory.addCrashSectionCallable("Screen name", new Callable<String>()
-                    {
-                        public String call() throws Exception
-                        {
+                    crashreportcategory.addCrashSectionCallable("Screen name", new Callable<String>() {
+                        public String call() throws Exception {
                             return EntityRenderer.this.mc.currentScreen.getClass().getCanonicalName();
                         }
                     });
-                    crashreportcategory.addCrashSectionCallable("Mouse location", new Callable<String>()
-                    {
-                        public String call() throws Exception
-                        {
-                            return String.format("Scaled: (%d, %d). Absolute: (%d, %d)", new Object[] {Integer.valueOf(k1), Integer.valueOf(l1), Integer.valueOf(Mouse.getX()), Integer.valueOf(Mouse.getY())});
-                        }
-                    });
-                    crashreportcategory.addCrashSectionCallable("Screen size", new Callable<String>()
-                    {
-                        public String call() throws Exception
-                        {
-                            return String.format("Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %d", new Object[] {Integer.valueOf(scaledresolution.getScaledWidth()), Integer.valueOf(scaledresolution.getScaledHeight()), Integer.valueOf(EntityRenderer.this.mc.displayWidth), Integer.valueOf(EntityRenderer.this.mc.displayHeight), Integer.valueOf(scaledresolution.getScaleFactor())});
-                        }
-                    });
+                    crashreportcategory.addCrashSectionCallable("Mouse location", () -> String.format("Scaled: (%d, %d). Absolute: (%d, %d)", k1, Integer.valueOf(l1), Integer.valueOf(Mouse.getX()), Integer.valueOf(Mouse.getY())));
+                    crashreportcategory.addCrashSectionCallable("Screen size", () -> String.format("Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %d", new Object[]{Integer.valueOf(scaledresolution.getScaledWidth()), Integer.valueOf(scaledresolution.getScaledHeight()), Integer.valueOf(EntityRenderer.this.mc.displayWidth), Integer.valueOf(EntityRenderer.this.mc.displayHeight), Integer.valueOf(scaledresolution.getScaleFactor())}));
                     throw new ReportedException(crashreport);
                 }
             }
@@ -1349,8 +1332,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
         MemoryMonitor.update();
         Lagometer.updateLagometer();
 
-        if (this.mc.gameSettings.ofProfiler)
-        {
+        if (this.mc.gameSettings.ofProfiler) {
             this.mc.gameSettings.showDebugProfilerChart = true;
         }
     }

@@ -4,7 +4,6 @@ import lombok.experimental.UtilityClass;
 import stanis.client.Client;
 import stanis.client.utils.access.Access;
 import stanis.client.utils.file.FileUtils;
-
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +27,10 @@ public class Fonts implements Access {
     private final List<String> FONT_FILES = List.of(
         "SFPro.ttf",
         "SFProRegular.ttf",
-        "SFProRounded.ttf"
+        "SFProRounded.ttf",
+        "RobotoSemiBold.ttf",
+        "RobotoBlack.ttf",
+        "JetBrains.ttf"
     );
 
     public void initFonts() {
@@ -74,8 +76,8 @@ public class Fonts implements Access {
                 System.out.println("Downloading font: " + fontFileName);
                 URL fontUrl = new URL(GITHUB_RAW_BASE + fontFileName);
 
-                try (InputStream in = fontUrl.openStream()) {
-                    Files.copy(in, fontFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try (InputStream is = fontUrl.openConnection().getInputStream()) {
+                    Files.copy(is, fontFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     downloadedAny = true;
                     System.out.println("Successfully downloaded: " + fontFileName);
                 }
@@ -88,19 +90,6 @@ public class Fonts implements Access {
         if (downloadedAny) {
             System.out.println("Fonts download completed from: " + GITHUB_FONTS_REPO);
         }
-    }
-
-    /**
-     * Проверяет наличие всех необходимых шрифтов
-     */
-    public boolean checkFontsAvailability() {
-        for (String fontFileName : FONT_FILES) {
-            File fontFile = new File(fontsDirectory, fontFileName);
-            if (!fontFile.exists()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private String getFileNameWithoutExtension(File file) {

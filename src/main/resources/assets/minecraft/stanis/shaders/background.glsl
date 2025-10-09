@@ -1,72 +1,19 @@
-/*
- * Original shader from: https://www.shadertoy.com/view/ddKSDd
- */
-
 #ifdef GL_ES
-precision lowp float;
+precision mediump float;
 #endif
 
-// glslsandbox uniforms
 uniform float time;
+
 uniform vec2 resolution;
 
-// shadertoy emulation
-#define iTime time
-#define iResolution resolution
+void main( void ) {
 
-// --------[ Original ShaderToy begins here ]---------- //
-// Simple hash function
-float hash(float n) {
-    return fract(sin(n) * 78757.5757 + cos(n) * 71767.8727);
-}
+    vec2 p = ( gl_FragCoord.xy / resolution.xy ) - .4 + .1;
 
-// 2D noise function
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
+    float sx = .1 * (p.x + .8) * sin(3. * p.x - 9. * time / 10.);
 
-    return mix(mix(hash(i.x + hash(i.y)), hash(i.x + 1.0 + hash(i.y)), u.x),
-    mix(hash(i.x + hash(i.y + 1.0)), hash(i.x + 1.0 + hash(i.y + 1.0)), u.x), u.y);
-}
+    float dy = 4./ (123. * abs(p.y - sx));
 
-// Aurora layer function
-vec3 auroraLayer(vec2 uv, float speed, float intensity, vec3 color) {
-    float t = iTime * speed;
-    vec2 scaleXY = vec2(4.0, 4.0);
-    vec2 movement = vec2(2.0, -2.0);
-    vec2 p = uv * scaleXY + t * movement;
-    float n = noise(p + noise(color.xy + p + t));
-    float aurora = smoothstep(0.0, 0.1, n - uv.y) * (1.0 - smoothstep(0.0, 0.5, n - uv.y));
+    gl_FragColor = vec4( (p.x + .7) * dy, 1.0 * dy, dy, 7.9 );
 
-    return aurora * intensity * color;
-}
-
-
-// Main image function
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
-    uv.x *= iResolution.x / iResolution.y;
-
-    // Create multiple aurora layers with varying colors, speeds, and intensities
-    vec3 color = vec3(0.0);
-
-    color += auroraLayer(uv, 0.05, 0.3, vec3(0.4, 0.2, 0.3));
-    color += auroraLayer(uv, 0.1, 0.4, vec3(0.7, 0.5, 0.9));
-    color += auroraLayer(uv, 0.15, 0.3, vec3(0.4, 0.3, 0.3));
-    color += auroraLayer(uv, 0.07, 0.2, vec3(0.4, 0.3, 0.6));
-
-    vec3 skyColor1 = vec3(0.9, 0.5, 0.4);
-    vec3 skyColor2 = vec3(0.9, 0.5, 0.35);
-    // Add a gradient to simulate the night sky
-    color += skyColor2 * (0.8 - smoothstep(0.0, 1.0, uv.y));
-    color += skyColor1 * (1.0 - smoothstep(0.0, 0.0, uv.y));
-
-    fragColor = vec4(color, 1.0);
-}
-// --------[ Original ShaderToy ends here ]---------- //
-
-void main(void)
-{
-    mainImage(gl_FragColor, gl_FragCoord.xy);
 }
