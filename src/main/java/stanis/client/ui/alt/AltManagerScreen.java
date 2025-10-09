@@ -3,6 +3,7 @@ package stanis.client.ui.alt;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
+import stanis.client.alt.Account;
 import stanis.client.ui.buttons.Button;
 import stanis.client.ui.buttons.TextButton;
 import stanis.client.utils.animation.Easing;
@@ -12,11 +13,14 @@ import stanis.client.utils.gui.GuiUtils;
 import stanis.client.utils.render.Rect;
 import stanis.client.utils.render.shader.impl.BackgroundUtils;
 import stanis.client.utils.render.shader.impl.RoundedUtils;
-
 import java.awt.*;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AltManagerScreen extends GuiScreen {
+
+    TextButton textButton;
 
     @Override
     public void initGui() {
@@ -32,7 +36,9 @@ public class AltManagerScreen extends GuiScreen {
 
     EasingAnimation hoverAnim = new EasingAnimation();
 
-    TextButton textButton;
+    List<Account> accounts = new CopyOnWriteArrayList<>();
+
+    Account selectedAccount;
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
@@ -47,7 +53,7 @@ public class AltManagerScreen extends GuiScreen {
             (sc.getScaledHeight() - 20)
         );
 
-        boolean hoveredRect = GuiUtils.isHovered(mouseX, mouseY, rect.x(), rect.y(), width, height);
+        boolean hoveredRect = GuiUtils.isHovered(mouseX, mouseY, rect.x(), rect.y(), rect.width(), rect.height());
 
         hoverAnim.update(0.7f, Easing.OUT_ELASTIC);
         hoverAnim.setEnd(hoveredRect ? 1 : 0);
