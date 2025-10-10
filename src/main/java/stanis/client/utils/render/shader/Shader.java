@@ -42,7 +42,7 @@ public class Shader implements Access {
 
 	public static void drawQuad() {
 		final ScaledResolution scaledResolution = new ScaledResolution(mc);
-		drawQuad(0.0, 0.0, scaledResolution.getScaledWidth_double(), scaledResolution.getScaledHeight_double());
+		drawQuad(0.0, 0.0, scaledResolution.getScaledWidthD(), scaledResolution.getScaledHeightD());
 	}
 
 	private String convertFileToString(ResourceLocation file) {

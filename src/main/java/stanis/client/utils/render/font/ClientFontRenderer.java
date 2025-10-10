@@ -226,7 +226,6 @@ public class ClientFontRenderer implements Access {
         for (int i = 0; i < size; i++) {
             char character = text.charAt(i);
 
-
             if (character == '\n') {
                 x = startX;
                 y += FONT_HEIGHT * 4;

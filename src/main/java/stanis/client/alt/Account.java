@@ -11,7 +11,9 @@ public class Account {
     String name;
     String refreshToken, uuid;
 
-    EasingAnimation anim = new EasingAnimation();
+    EasingAnimation hoverAnim = new EasingAnimation();
+    EasingAnimation deleteAnim = new EasingAnimation();
+    EasingAnimation selectAnim = new EasingAnimation();
 
     AccountType type;
 

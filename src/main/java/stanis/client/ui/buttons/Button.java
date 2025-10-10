@@ -23,7 +23,7 @@ public class Button extends GuiButton {
     EasingAnimation hoverAnim = new EasingAnimation();
 
     public Button(int id, String name, float x, float y, float width, float height) {
-        super(id, (int) x, (int) y, name);
+        super(id, (int) x, (int) y, (int) width, (int) height, name);
         this.name = name;
         this.x = x;
         this.y = y;

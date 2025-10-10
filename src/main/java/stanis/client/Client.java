@@ -5,10 +5,12 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.Display;
 import stanis.client.func.Funcs;
 import stanis.client.utils.file.FileUtils;
+import stanis.client.utils.generate.NameGenerator;
 import stanis.client.utils.icon.IconUtils;
 import stanis.client.utils.render.font.Fonts;
 import stanis.client.utils.render.shader.Shaders;
-
+import stanis.client.utils.sound.Sounds;
+import java.io.IOException;
 import java.io.File;
 
 @UtilityClass
@@ -26,10 +28,18 @@ public class Client {
     public final File CLIENT_DIRECTORY = new File(NAME);
 
     public void start() {
-        System.out.println(NAME + " " + VERSION);
+//        System.out.println(NAME + " " + VERSION);
         setDisplayInfo();
 
         FileUtils.createDirectoriesIfNotExists(CLIENT_DIRECTORY);
+
+        try {
+            Sounds.init();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        NameGenerator.init("names.txt");
 
         Shaders.init();
 

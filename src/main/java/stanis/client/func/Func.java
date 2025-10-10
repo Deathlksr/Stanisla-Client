@@ -29,9 +29,15 @@ public class Func implements EventListener, Access {
     }
 
     public void toggle() {
+        if (toggled) onDisable();
+        if (!toggled) onEnable();
         toggled = !toggled;
         Funcs.onStanislaToggle(this);
     }
+
+    public void onEnable() {}
+
+    public void onDisable() {}
 
     @Override
     public void listen(Event event) {}

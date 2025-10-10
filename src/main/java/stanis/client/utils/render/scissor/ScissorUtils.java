@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.gui.ScaledResolution;
 import stanis.client.utils.access.Access;
+import stanis.client.utils.render.Rect;
 
 import java.awt.*;
 
@@ -13,7 +14,7 @@ import static org.lwjgl.opengl.GL11.*;
 @Setter
 public class ScissorUtils implements Access {
 
-    private static boolean debugScissor;
+    public static boolean debugScissor;
 
     public static void enableScissor() {
         glEnable(GL_SCISSOR_TEST);
@@ -21,6 +22,10 @@ public class ScissorUtils implements Access {
 
     public static void disableScissor() {
         glDisable(GL_SCISSOR_TEST);
+    }
+
+    public static void scissor(ScaledResolution sc, Rect rect) {
+        scissor(sc, rect.x() + 2, rect.y() + 2, rect.width() - 4, rect.height() - 4);
     }
 
     public static void scissor(ScaledResolution scaledResolution, double x, double y, double width, double height) {

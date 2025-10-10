@@ -228,8 +228,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
     private Entity renderViewEntity;
     public Entity pointedEntity;
     public EffectRenderer effectRenderer;
-    @Getter
-    private final Session session;
+    @Getter @Setter private Session session;
     @Getter
     private boolean isGamePaused;
     public FontRenderer fontRendererObj;
@@ -983,7 +982,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage {
     }
 
     public int getLimitFramerate() {
-        return this.theWorld == null && this.currentScreen != null ? 30 : this.gameSettings.limitFramerate;
+        return this.theWorld == null && this.currentScreen != null ? 90 : this.gameSettings.limitFramerate;
     }
 
     public boolean isFramerateLimitBelowMax() {

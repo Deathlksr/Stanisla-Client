@@ -22,7 +22,7 @@ public class ImageButton extends GuiButton {
     EasingAnimation hoverAnim = new EasingAnimation();
 
     public ImageButton(int id, ResourceLocation image, float x, float y, float width, float height) {
-        super(id, (int) x, (int) y, "");
+        super(id, (int) x, (int) y, (int) width, (int) height, "");
         this.x = x;
         this.y = y;
         this.width = width;

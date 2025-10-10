@@ -51,6 +51,10 @@ public class EasingAnimation {
         }
     }
 
+    public void setEnd(boolean end) {
+        setEnd(end ? 1 : 0);
+    }
+
     public boolean isAnimating() {
         return progress < 1f;
     }

@@ -3,8 +3,7 @@ package stanis.client.func;
 import lombok.experimental.UtilityClass;
 import stanis.client.func.impl.player.*;
 //import stanis.client.func.impl.pvp.*;
-//import stanis.client.func.impl.render.*;
-
+import stanis.client.func.impl.render.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ public class Funcs {
 
     public void init() {
         new AutoSprint();
+        new ClickGui();
 
         list.forEach(Funcs::onStanislaToggle);
     }

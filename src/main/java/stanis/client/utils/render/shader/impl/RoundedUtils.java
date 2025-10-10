@@ -17,7 +17,7 @@ public class RoundedUtils implements Access {
         program.start();
 
         program.uniform2f("u_size", width, height);
-        program.uniform4f("u_radius", radius.leftUp(), radius.leftDown(), radius.rightDown(), radius.rightUp());
+        program.uniform4f("u_radius", radius.leftDown(), radius.leftUp(), radius.rightDown(), radius.rightUp());
         program.uniform1f("u_smooth", 1f);
         program.uniform4f("u_color", color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, color.getAlpha() / 255.0F);
         GlStateManager.enableBlend();
@@ -40,6 +40,10 @@ public class RoundedUtils implements Access {
 
     public static void drawCenteredRect(final float x, final float y, final float width, final float height, final float radius, final Color color) {
         draw(x - 1f - width / 2f, y - 1f, width + 2, height + 2, QuadRadius.one(radius), color);
+    }
+
+    public static void drawRect(Rect rect, QuadRadius radius, Color color) {
+        draw(rect.x() - 1f, rect.y() - 1f, rect.width() + 2, rect.height() + 2, radius, color);
     }
 
     public static void drawRect(Rect rect, float radius, Color color) {

@@ -23,6 +23,7 @@ public class TextButton extends GuiTextField {
 
     public TextButton(int id, float x, float y, float width, float height) {
         super(id, null, (int) x, (int) y, (int) width, (int) height);
+        this.setMaxStringLength(16);
         this.x = x;
         this.y = y;
         this.width = width;

@@ -3,15 +3,20 @@ package net.minecraft.util;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.util.UUIDTypeAdapter;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Map;
 import java.util.UUID;
 
+@Getter
+@Setter
 public class Session
 {
-    private final String username;
-    private final String playerID;
-    private final String token;
-    private final Session.Type sessionType;
+    private String username;
+    private String playerID;
+    private String token;
+    private Session.Type sessionType;
 
     public Session(String usernameIn, String playerIDIn, String tokenIn, String sessionTypeIn)
     {
@@ -26,21 +31,6 @@ public class Session
         return "token:" + this.token + ":" + this.playerID;
     }
 
-    public String getPlayerID()
-    {
-        return this.playerID;
-    }
-
-    public String getUsername()
-    {
-        return this.username;
-    }
-
-    public String getToken()
-    {
-        return this.token;
-    }
-
     public GameProfile getProfile()
     {
         try
@@ -52,11 +42,6 @@ public class Session
         {
             return new GameProfile((UUID)null, this.getUsername());
         }
-    }
-
-    public Session.Type getSessionType()
-    {
-        return this.sessionType;
     }
 
     public static enum Type
